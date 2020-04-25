@@ -12,6 +12,7 @@ namespace TrafficManager {
     using static TrafficManager.Util.Shortcuts;
     using ColossalFramework;
     using UnityEngine.SceneManagement;
+    using CitiesHarmony.API;
 
     public class TrafficManagerMod : IUserMod {
 #if LABS
@@ -82,6 +83,8 @@ namespace TrafficManager {
                     Log.InfoFormat("Mono version: {0}", displayName.Invoke(null, null));
                 }
             }
+
+            HarmonyHelper.EnsureHarmonyInstalled();
 
             Instance = this;
             InGameHotReload = InGame();
