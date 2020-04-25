@@ -155,6 +155,7 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patcher.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
@@ -181,7 +182,6 @@
     <Compile Include="RedirectionFramework\Attributes\RedirectReverseAttribute.cs" />
     <Compile Include="RedirectionFramework\Attributes\TargetTypeAttribute.cs" />
     <Compile Include="RedirectionFramework\Extensions\TypeExtension.cs" />
-    <Compile Include="RedirectionFramework\HarmonyUtil.cs" />
     <Compile Include="RedirectionFramework\RedirectionHelper.cs" />
     <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
     <Compile Include="RedirectionFramework\Redirector.cs" />

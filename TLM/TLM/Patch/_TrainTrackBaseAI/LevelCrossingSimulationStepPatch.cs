@@ -1,8 +1,8 @@
-﻿namespace TrafficManager.Patch._TrainTrackBase {
+namespace TrafficManager.Patch._TrainTrackBase {
     using JetBrains.Annotations;
     using TrafficManager.State;
 
-    // [Harmony] Manually patched because struct references are used
+    [Harmony] Manually patched because struct references are used
     public class LevelCrossingSimulationStepPatch {
         /// <summary>
         /// Decides whether the stock simulation step for traffic lights should run.

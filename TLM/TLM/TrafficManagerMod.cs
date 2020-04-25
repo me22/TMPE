@@ -1,18 +1,16 @@
 namespace TrafficManager {
+    using CitiesHarmony.API;
     using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using System.Reflection;
     using System;
+    using System.Reflection;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
-    using static TrafficManager.Util.Shortcuts;
-    using ColossalFramework;
     using UnityEngine.SceneManagement;
-    using CitiesHarmony.API;
 
     public class TrafficManagerMod : IUserMod {
 #if LABS
@@ -51,6 +49,11 @@ namespace TrafficManager {
 
         [UsedImplicitly]
         public void OnEnabled() {
+            Log.Info("OnEnabled() called");
+            HarmonyHelper.DoOnHarmonyReady(() => OnEnabledImpl());
+        }
+
+        private void OnEnabledImpl() {
             Log.InfoFormat(
                 "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
                 VersionString,
@@ -84,7 +87,6 @@ namespace TrafficManager {
                 }
             }
 
-            HarmonyHelper.EnsureHarmonyInstalled();
 
             Instance = this;
             InGameHotReload = InGame();
@@ -106,14 +108,14 @@ namespace TrafficManager {
         }
 
         [UsedImplicitly]
-        public void OnSettingsUI(UIHelperBase helper) {
-            // Note: This bugs out if done in OnEnabled(), hence doing it here instead.
-            if (!Translation.IsListeningToGameLocaleChanged) {
-                Translation.IsListeningToGameLocaleChanged = true;
-                LocaleManager.eventLocaleChanged += new LocaleManager.LocaleChangedHandler(Translation.HandleGameLocaleChange);
-            }
-            Options.MakeSettings(helper);
-        }
+        //public void OnSettingsUI(UIHelperBase helper) {
+        //    // Note: This bugs out if done in OnEnabled(), hence doing it here instead.
+        //    if (!Translation.IsListeningToGameLocaleChanged) {
+        //        Translation.IsListeningToGameLocaleChanged = true;
+        //        LocaleManager.eventLocaleChanged += new LocaleManager.LocaleChangedHandler(Translation.HandleGameLocaleChange);
+        //    }
+        //    Options.MakeSettings(helper);
+        //}
 
         private static void CheckForIncompatibleMods() {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
