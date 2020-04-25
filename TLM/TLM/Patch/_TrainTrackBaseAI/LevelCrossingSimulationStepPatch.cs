@@ -1,8 +1,9 @@
 namespace TrafficManager.Patch._TrainTrackBase {
     using JetBrains.Annotations;
     using TrafficManager.State;
+    using HarmonyLib;
 
-    [Harmony] Manually patched because struct references are used
+    [HarmonyPatch(typeof(TrainTrackBaseAI), nameof(TrainTrackBaseAI.LevelCrossingSimulationStep))] 
     public class LevelCrossingSimulationStepPatch {
         /// <summary>
         /// Decides whether the stock simulation step for traffic lights should run.
@@ -13,7 +14,7 @@ namespace TrafficManager.Patch._TrainTrackBase {
                    || !Constants.ManagerFactory
                                 .TrafficLightSimulationManager
                                 .TrafficLightSimulations[nodeID]
-                                .IsSimulationRunning();
+                                .IsSimulationRunning(); 
         }
     }
 }
