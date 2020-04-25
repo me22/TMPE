@@ -1,15 +1,18 @@
 namespace TrafficManager.UI {
+    using System;
     using ColossalFramework.UI;
     using JetBrains.Annotations;
+    using TrafficManager.U;
     using UnityEngine;
 
-    public abstract class SubTool {
+    [Obsolete("Refactor tools to the new TrafficManagerSubTool class instead of LegacySubTool")]
+    public abstract class LegacySubTool {
         protected TrafficManagerTool MainTool { get; }
 
         private Texture2D WindowTexture {
             get {
                 if (windowTexture_ == null) {
-                    windowTexture_ = TrafficManagerTool.AdjustAlpha(
+                    windowTexture_ = TextureUtil.AdjustAlpha(
                         Textures.MainMenu.WindowBackground,
                         TrafficManagerTool.GetWindowAlpha());
                 }
@@ -21,29 +24,32 @@ namespace TrafficManager.UI {
         private Texture2D windowTexture_;
 
         protected GUIStyle WindowStyle =>
-            windowStyle_ ?? (windowStyle_ = new GUIStyle {
+            // ReSharper disable once ConvertToNullCoalescingCompoundAssignment
+            windowStyle_ ??
+            (windowStyle_
+                 = new GUIStyle {
                                     normal = {
-                                        background = WindowTexture,
-                                        textColor = Color.white
-                                    },
+                                                 background = WindowTexture,
+                                                 textColor = Color.white,
+                                             },
                                     alignment = TextAnchor.UpperCenter,
                                     fontSize = 20,
                                     border = {
-                                        left = 4,
-                                        top = 41,
-                                        right = 4,
-                                        bottom = 8
-                                    },
+                                                 left = 4,
+                                                 top = 41,
+                                                 right = 4,
+                                                 bottom = 8,
+                                             },
                                     overflow = {
-                                        bottom = 0,
-                                        top = 0,
-                                        right = 12,
-                                        left = 12
-                                    },
+                                                   bottom = 0,
+                                                   top = 0,
+                                                   right = 12,
+                                                   left = 12,
+                                               },
                                     contentOffset = new Vector2(0, -44),
                                     padding = {
-                                        top = 55
-                                    }
+                                                  top = 55,
+                                              },
                                 });
 
         private GUIStyle windowStyle_;
@@ -64,16 +70,19 @@ namespace TrafficManager.UI {
         private Texture2D borderlessTexture_;
 
         protected GUIStyle BorderlessStyle =>
-            borderlessStyle_ ?? (borderlessStyle_ = new GUIStyle {
-                                        normal = { background = BorderlessTexture },
-                                        alignment = TextAnchor.MiddleCenter,
-                                        border = {
-                                            bottom = 2,
-                                            top = 2,
-                                            right = 2,
-                                            left = 2
-                                        }
-                                    });
+            // ReSharper disable once ConvertToNullCoalescingCompoundAssignment
+            borderlessStyle_
+            ?? (borderlessStyle_
+                    = new GUIStyle {
+                                       normal = { background = BorderlessTexture },
+                                       alignment = TextAnchor.MiddleCenter,
+                                       border = {
+                                                    bottom = 2,
+                                                    top = 2,
+                                                    right = 2,
+                                                    left = 2,
+                                                },
+                                   });
 
         private GUIStyle borderlessStyle_;
 
@@ -101,7 +110,7 @@ namespace TrafficManager.UI {
             set => TrafficManagerTool.SelectedSegmentId = value;
         }
 
-        public SubTool(TrafficManagerTool mainTool) {
+        public LegacySubTool(TrafficManagerTool mainTool) {
             MainTool = mainTool;
         }
 
@@ -111,10 +120,13 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// Called whenever the
+        /// Called whenever the mouse left click happened on the world, while the tool was active.
         /// </summary>
         public abstract void OnPrimaryClickOverlay();
 
+        /// <summary>
+        /// Called whenever the mouse right click happened on the world, while the tool was active.
+        /// </summary>
         public virtual void OnSecondaryClickOverlay() { }
 
         public virtual void OnToolGUI(Event e) {
@@ -138,7 +150,12 @@ namespace TrafficManager.UI {
 
         public virtual void OnActivate() { }
 
-        public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
+        /// <summary>
+        /// Renders current situation overlay, called while the tool is not active to assist
+        /// other tools.
+        /// </summary>
+        /// <param name="cameraInfo">The camera.</param>
+        public virtual void RenderOverlayForOtherTools(RenderManager.CameraInfo cameraInfo) { }
 
         public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }
 

@@ -2,6 +2,7 @@ namespace TrafficManager {
     using GenericGameBridge.Factory;
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
+    using UnityEngine;
 
     public static class Constants {
         /// <summary>

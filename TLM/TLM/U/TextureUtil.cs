@@ -1,9 +1,12 @@
-﻿namespace TrafficManager.U {
+namespace TrafficManager.U {
     using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.UI.Textures;
     using UnityEngine;
+    using CSUtil.Commons;
+    using TrafficManager.State.ConfigData;
 
     public static class TextureUtil {
         /// <summary>
@@ -22,22 +25,36 @@
                                                  int spriteHeight,
                                                  int hintAtlasTextureSize) {
             Texture2D texture2D = new Texture2D(
-                hintAtlasTextureSize,
-                hintAtlasTextureSize,
-                TextureFormat.ARGB32,
-                false);
-            var textures = new List<Texture2D>(spriteNames.Length);
+                width: hintAtlasTextureSize,
+                height: hintAtlasTextureSize,
+                format: TextureFormat.ARGB32,
+                mipmap: false);
+
+            var loadedTextures = new List<Texture2D>(spriteNames.Length);
+            var loadedSpriteNames = new List<string>();
 
             // Load separate sprites and then pack it in a texture together
             foreach (string spriteName in spriteNames) {
+                string resourceName = $"{resourcePrefix}.{spriteName}.png";
+                Log._Debug($"TextureUtil: Loading {resourceName} for sprite={spriteName}");
+
                 Texture2D loadedSprite = TextureResources.LoadDllResource(
-                    $"{resourcePrefix}.{spriteName}.png",
-                    spriteWidth,
-                    spriteHeight);
-                textures.Add(loadedSprite);
+                    resourceName: resourceName,
+                    width: spriteWidth,
+                    height: spriteHeight);
+
+                if (loadedSprite != null) {
+                    loadedTextures.Add(loadedSprite);
+                    loadedSpriteNames.Add(spriteName); // only take those which are loaded
+                } else {
+                    Log.Error($"TextureUtil: Sprite load failed: {resourceName} for sprite={spriteName}");
+                }
             }
 
-            var regions = texture2D.PackTextures(textures.ToArray(), 2, hintAtlasTextureSize);
+            var regions = texture2D.PackTextures(
+                textures: loadedTextures.ToArray(),
+                padding: 2,
+                maximumAtlasSize: hintAtlasTextureSize);
 
             // Now using loaded and packed textures, create the atlas with sprites
             UITextureAtlas newAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();
@@ -50,8 +67,8 @@
 
             for (int i = 0; i < spriteNames.Length; i++) {
                 var item = new UITextureAtlas.SpriteInfo {
-                                                             name = spriteNames[i],
-                                                             texture = textures[i],
+                                                             name = loadedSpriteNames[i],
+                                                             texture = loadedTextures[i],
                                                              region = regions[i],
                                                          };
 
@@ -80,6 +97,13 @@
                     "Number of sprite name does not match dimensions " +
                     $"(expected {numX} x {numY}, was {spriteNames.Length})");
             }
+
+#if DEBUG
+            Log._DebugIf(
+            DebugSwitch.ResourceLoading.Get(),
+                () => $"Loading atlas for {name} count:{numX}x{numY} " +
+                $"texture:{texture.name} size:{texture.width}x{texture.height}");
+#endif
 
             UITextureAtlas atlas = ScriptableObject.CreateInstance<UITextureAtlas>();
             atlas.padding = 0;
@@ -127,6 +151,42 @@
             }
 
             return atlas;
+        }
+
+        /// <summary>Creates new texture with changed alpha transparency for every pixel.</summary>
+        /// <param name="tex">Copy from.</param>
+        /// <param name="alpha">New alpha.</param>
+        /// <returns>New texture.</returns>
+        public static Texture2D AdjustAlpha(Texture2D tex, float alpha) {
+            Color[] texColors = tex.GetPixels();
+            Color[] retPixels = new Color[texColors.Length];
+
+            for (int i = 0; i < texColors.Length; ++i) {
+                retPixels[i] = new Color(
+                    texColors[i].r,
+                    texColors[i].g,
+                    texColors[i].b,
+                    texColors[i].a * alpha);
+            }
+
+            Texture2D ret = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+
+            ret.SetPixels(retPixels);
+            ret.Apply();
+
+            return ret;
+        }
+
+        public static UITextureAtlas FindAtlas(string name) {
+            UITextureAtlas[] atlases =
+                Resources.FindObjectsOfTypeAll(typeof(UITextureAtlas)) as UITextureAtlas[];
+            for (int i = 0; i < atlases.Length; i++) {
+                if (atlases[i].name == name) {
+                    return atlases[i];
+                }
+            }
+
+            return UIView.GetAView().defaultAtlas;
         }
     } // end class
 }

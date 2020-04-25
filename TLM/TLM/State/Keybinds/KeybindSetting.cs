@@ -1,5 +1,7 @@
 namespace TrafficManager.State.Keybinds {
+    using System.Collections.Generic;
     using ColossalFramework;
+    using ColossalFramework.UI;
     using JetBrains.Annotations;
     using UnityEngine;
 
@@ -60,15 +62,15 @@ namespace TrafficManager.State.Keybinds {
                               InputKey? defaultKey2) {
             Category = cat;
             Key = new SavedInputKey(
-                configFileKey,
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
-                defaultKey1 ?? SavedInputKey.Empty,
-                true);
+                name: configFileKey,
+                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                def: defaultKey1 ?? SavedInputKey.Empty,
+                autoUpdate: true);
             AlternateKey = new SavedInputKey(
-                configFileKey + "_Alternate",
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
-                defaultKey2 ?? SavedInputKey.Empty,
-                true);
+                name: configFileKey + "_Alternate",
+                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                def: defaultKey2 ?? SavedInputKey.Empty,
+                autoUpdate: true);
         }
 
         /// <summary>
@@ -95,11 +97,41 @@ namespace TrafficManager.State.Keybinds {
             return result + Keybind.ToLocalizedString(AlternateKey);
         }
 
+        /// <summary>
+        /// Produce a keybind tooltip text, or two if alternate key is set. Prefixed if not empty.
+        /// </summary>
+        /// <param name="prefix">Prefix will be added if any key is not empty</param>
+        /// <returns>String tooltip with the key shortcut or two</returns>
+        public List<string> ToLocalizedStringList() {
+            var result = new List<string>(capacity: 2);
+            if (!Keybind.IsEmpty(Key)) {
+                result.Add(Keybind.ToLocalizedString(Key));;
+            }
+
+            if (AlternateKey != null && !Keybind.IsEmpty(AlternateKey)) {
+                result.Add(Keybind.ToLocalizedString(AlternateKey));
+            }
+
+            return result;
+        }
+
         /// <param name="e"></param>
         /// <returns>true for as long as user holds the key</returns>
         public bool IsPressed(Event e) {
             return Key.IsPressed(e)
                    || (AlternateKey != null && AlternateKey.IsPressed(e));
+        }
+
+        /// <summary>Check whether keyDownEvent matches either of the shortcuts.</summary>
+        /// <param name="kep">Event coming into eventKeyDown.</param>
+        /// <returns>Whether the main key or alternate key is pressed.</returns>
+        public bool IsPressed(UIKeyEventParameter kep) {
+            EventModifiers modifiers = (kep.alt ? EventModifiers.Alt : 0)
+                                       | (kep.control ? EventModifiers.Control : 0)
+                                       | (kep.shift ? EventModifiers.Shift : 0);
+            return Key.IsPressed(EventType.keyDown, kep.keycode, modifiers)
+                   || (AlternateKey != null
+                       && AlternateKey.IsPressed(EventType.keyDown, kep.keycode, modifiers));
         }
 
         private bool prev_value = false;
@@ -114,7 +146,7 @@ namespace TrafficManager.State.Keybinds {
             bool value = Key.IsPressed(e);
             bool ret = value && !prev_value;
             if (ret || !value) {
-                prev_value = value; 
+                prev_value = value;
             }
             return ret;
         }

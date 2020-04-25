@@ -23,6 +23,91 @@ This changelog includes all versions and major variants of the mod going all the
 > * **TM** = Traffic Manager
 > * **CSLT** = Cities Skylines Traffic (later renamed to Traffic++)
 > * **TLM** = Taffic Lights Manager (later renamed to Traffic Manager)
+>  
+> Date format: dd/mm/yyyy
+
+#### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) LABS, 14/04/2020
+
+- Added: State machine for dedicated turning lanes (#755, #567)
+- Fixed: Default turning lane on wrong side (#755, #671)
+- Meta: Repeat application of turning lane shortcut will cycle through available options
+
+#### TM:PE V[11.3.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.1...11.3.2) LABS, 14/04/2020
+
+- Fixed: Icons not showing when selecting node (thanks xenoxaos for reporting!) (#839, #838)
+- Fixed: Bug in `StartPathFind()` if building missing (thanks ninjanoobslayer for reporting!) (#834, #840)
+- Updated: `StartPathFind()` will automatically run diagnostic logging on errors (#834)
+- Updated: Resident/Tourist status logic simplified (#837)
+
+#### TM:PE V[11.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.0...11.3.1) LABS, 11/04/2020
+
+- Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
+- Updated: Trees Respiration mod is now compatible with TM:PE v11! (thanks Klyte45!) (#831, #614, #611, #563, #484)
+
+#### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
+
+- Added: Advanced auto lane connector tool (select a node, then `Ctrl + S`) (#706, #703)
+- Fixed: Stay-in-lane should not connect solitary lanes (#706, #617)
+- Fixed: Lane arrows UI too small on some resolutions except at junctions (#726, #571)
+- Updated: Lane connectors: `Shift + S` changed to `Ctrl + S` (see Options > Keybinds tab) (#706)
+- Updated: Lane Arrows UI now respects UI scale slider (see Options > General tab) (#726)
+- Updated: Improved UI for lane arrows tool (#726, #571)
+- Updated: Translations (will add more info later) (#726)
+
+#### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) STABLE, 08/04/2020
+
+- Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
+
+#### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) LABS, 08/04/2020
+
+- Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
+
+#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) STABLE, 26/03/2020
+
+- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
+- Updated: Game version badges in readme (#806)
+- Updated: Mod version and changelogs (#816)
+
+#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) LABS, 26/03/2020
+
+- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
+- Updated: Game version badges in readme (#806)
+- Updated: Mod version and changelogs (#816)
+
+#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) STABLE, 26/03/2020
+
+- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
+- Fixed: Add missing Trolleybus vehicle category (#794)
+- Fixed: CustomPathManager NullPointerException on second load (#794)
+
+#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) LABS, 29/03/2020
+
+- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
+- Fixed: Add missing Trolleybus vehicle category (#794)
+- Fixed: CustomPathManager NullPointerException on second load (#794)
+
+#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.2...11.2.0) LABS, 26/03/2020
+
+- Added: Trolleybus AI (#794)
+- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
+- Fixed: Priority signs for trolleybuses (#794)
+- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
+- Improved: Performance of hot-reloads of dev builds (#764, #730)
+- Improved: Consolidate error prompts in to helper class (#774)
+- Updated: Add missing entries and fix typos in changelog (#777, #779)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+
+#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.2.0) STABLE, 26/03/2020
+
+- Added: Trolleybus AI (#794)
+- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
+- Fixed: Priority signs for trolleybuses (#794)
+- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
+- Improved: Performance of hot-reloads of dev builds (#764, #730)
+- Improved: Consolidate error prompts in to helper class (#774)
+- Updated: Add missing entries and fix typos in changelog (#777, #779)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+- GitHub: [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
 
 ### TM:PE V[11.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1-hotfix1...11.1.2) LABS, 02/03/2020
 

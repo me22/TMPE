@@ -3,6 +3,7 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using System;
     using TrafficManager.UI.MainMenu;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -23,51 +24,93 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
-        public UI.MainMenu.MainMenuButton MainMenuButton { get; }
+        public UI.MainMenu.MainMenuButton MainMenuButton { get; set; }
 
         /// <summary>Gets the floating tool panel with TM:PE tool buttons.</summary>
-        public UI.MainMenu.MainMenuPanel MainMenu { get; private set; }
+        public UI.MainMenu.MainMenuWindow MainMenu { get; set; }
 
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
 #endif
 
         public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired = true) {
-            if (tool == null && createIfRequired) {
+            if (trafficManagerTool_ == null && createIfRequired) {
                 Log.Info("Initializing traffic manager tool...");
                 GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
-                tool = toolModControl.GetComponent<TrafficManagerTool>()
-                       ?? toolModControl.AddComponent<TrafficManagerTool>();
-                tool.Initialize();
+                trafficManagerTool_ =
+                    toolModControl.GetComponent<TrafficManagerTool>()
+                    ?? toolModControl.AddComponent<TrafficManagerTool>();
+                trafficManagerTool_.Initialize();
             }
 
-            return tool;
+            return trafficManagerTool_;
         }
 
-        private static TrafficManagerTool tool;
+        private static TrafficManagerTool trafficManagerTool_;
 
         public static TrafficManagerMode ToolMode { get; set; }
 
         private bool _uiShown;
 
+        /// <summary>Event to be sent when UI scale changes in the General Options tab.</summary>
+        public struct UIScaleNotification { public float NewScale; }
+
+        public class UIScaleObservable : GenericObservable<UIScaleNotification> {
+        }
+
+        /// <summary>
+        /// Subscribe to this to get notifications in your UI about UI scale changes (slider in
+        /// General options tab).
+        /// </summary>
+        [NonSerialized]
+        public UIScaleObservable UiScaleObservable;
+
+        /// <summary>Event to be sent when UI transparency slider changes in the General Options tab.</summary>
+        public struct UIOpacityNotification { public U.UOpacityValue Opacity; }
+
+        public class UIOpacityObservable : GenericObservable<UIOpacityNotification> {
+        }
+
+        /// <summary>
+        /// Subscribe to this to get notifications in your UI about UI transparency changes
+        /// (slider in General options tab).
+        /// </summary>
+        [NonSerialized]
+        public UIOpacityObservable uiOpacityObservable;
+
         public ModUI() {
+            UiScaleObservable = new UIScaleObservable();
+            uiOpacityObservable = new UIOpacityObservable();
+
             Log._Debug("##### Initializing ModUI.");
 
-            // Get the UIView object. This seems to be the top-level object for most
-            // of the UI.
-            UIView uiView = UIView.GetAView();
-
-            // Add a new button to the view.
-            MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
-
-            // add the menu
-            MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
-            MainMenu.gameObject.AddComponent<CustomKeyHandler>();
+            CreateMainMenuButtonAndWindow();
 #if DEBUG
+            UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
 
             ToolMode = TrafficManagerMode.None;
+
+            // One time load
+            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+        }
+
+        private void CreateMainMenuButtonAndWindow() {
+            UIView uiView = UIView.GetAView();
+            try {
+                MainMenu = MainMenuWindow.CreateMainMenuWindow();
+            }
+            catch (Exception e) {
+                Log.Error($"While creating MainMenu: {e}");
+            }
+            try {
+                MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
+            }
+            catch (Exception e) {
+                Log.Error($"While creating MainButton: {e}");
+            }
         }
 
         ~ModUI() {
@@ -89,26 +132,30 @@ namespace TrafficManager.UI {
             }
         }
 
+        /// <summary>
+        /// Called from Options and Options-Maintenance tab, when features and options changed,
+        /// which might require rebuilding the main menu buttons.
+        /// </summary>
         internal void RebuildMenu() {
-            // Close();
+            Close();
 
             if (MainMenu != null) {
-//                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
-//                 if (keyHandler != null) {
-//                     UnityEngine.Object.Destroy(keyHandler);
-//                 }
-//
-//                 UnityEngine.Object.Destroy(MainMenu);
+                CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+                if (keyHandler != null) {
+                    UnityEngine.Object.Destroy(keyHandler);
+                }
+
+                UnityEngine.Object.Destroy(MainMenu);
+                UnityEngine.Object.Destroy(MainMenuButton);
+                MainMenu = null;
+                MainMenuButton = null;
 #if DEBUG
-                 UnityEngine.Object.Destroy(DebugMenu);
+                UnityEngine.Object.Destroy(DebugMenu);
+                DebugMenu = null;
 #endif
-                 MainMenu.OnRescaleRequested();
             }
 
-            // UIView uiView = UIView.GetAView();
-            // MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
-            // MainMenu.gameObject.AddComponent<CustomKeyHandler>();
-
+            CreateMainMenuButtonAndWindow();
 #if DEBUG
             UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
@@ -122,13 +169,10 @@ namespace TrafficManager.UI {
                 Log.Error("Error on Show(): " + e);
             }
 
-            foreach (BaseMenuButton button in GetMenu().Buttons) {
-                button.UpdateButtonImageAndTooltip();
-            }
+            MainMenuWindow menuWindow = GetMenu();
+            menuWindow.UpdateButtons();
+            menuWindow.Show();
 
-            GetMenu().Show();
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
             TrafficManagerTool.ShowAdvisor("MainMenu");
 #if DEBUG
             GetDebugMenu().Show();
@@ -140,21 +184,21 @@ namespace TrafficManager.UI {
         }
 
         public void Close() {
+            // Before hiding the menu, shut down the active tool
+            GetTrafficManagerTool(false)?.SetToolMode(UI.ToolMode.None);
+
+            // Main menu is going invisible
             GetMenu().Hide();
 #if DEBUG
             GetDebugMenu().Hide();
 #endif
-            TrafficManagerTool tmTool = GetTrafficManagerTool(false);
-            if (tmTool != null) {
-                tmTool.SetToolMode(UI.ToolMode.None);
-            }
 
             SetToolMode(TrafficManagerMode.None);
             _uiShown = false;
             MainMenuButton.UpdateButtonImageAndTooltip();
         }
 
-        internal MainMenuPanel GetMenu() {
+        internal MainMenuWindow GetMenu() {
             return MainMenu;
         }
 
@@ -186,13 +230,24 @@ namespace TrafficManager.UI {
             ToolsModifierControl.SetTool<TrafficManagerTool>();
         }
 
+        public static void OnLevelLoaded() {
+            Log._Debug("ModUI.OnLevelLoaded: called");
+            if (ModUI.Instance == null) {
+                Log._Debug("Adding UIBase instance.");
+                ModUI.SetSingletonInstance(
+                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
+            }
+            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+        }
+
         public static void DisableTool() {
             Log._Debug("ModUI.DisableTool: called");
             if (ToolsModifierControl.toolController == null) {
                 Log.Warning("ModUI.DisableTool: ToolsModifierControl.toolController is null!");
-            } else if (tool == null) {
+            } else if (trafficManagerTool_ == null) {
                 Log.Warning("ModUI.DisableTool: tool is null!");
-            } else if (ToolsModifierControl.toolController.CurrentTool != tool) {
+            } else if (ToolsModifierControl.toolController.CurrentTool != trafficManagerTool_) {
                 Log.Info("ModUI.DisableTool: CurrentTool is not traffic manager tool!");
             } else {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
@@ -207,17 +262,11 @@ namespace TrafficManager.UI {
 
         private static void DestroyTool() {
             DisableTool();
-            if (tool != null) {
+            if (trafficManagerTool_ != null) {
                 Log.Info("Removing Traffic Manager Tool.");
-                UnityEngine.Object.Destroy(tool);
-                tool = null;
+                UnityEngine.Object.Destroy(trafficManagerTool_);
+                trafficManagerTool_ = null;
             } // end if
         } // end DestroyTool()
-
-        /// <summary>Called from settings window, when windows need rescaling because GUI scale
-        /// slider has changed.</summary>
-        public void NotifyGuiScaleChanged() {
-            MainMenu.OnRescaleRequested();
-        }
     }
 }

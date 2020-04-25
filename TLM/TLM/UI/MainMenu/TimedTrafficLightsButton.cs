@@ -5,7 +5,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U.Button;
 
     public class TimedTrafficLightsButton : BaseMenuToolModeButton {
-        protected override ToolMode ToolMode => ToolMode.TimedLightsSelectNode;
+        protected override ToolMode ToolMode => ToolMode.TimedTrafficLights;
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
@@ -19,12 +19,12 @@ namespace TrafficManager.UI.MainMenu {
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("TimedTrafficLights");
-
-        public override string GetTooltip() =>
+        protected override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Timed traffic lights") + "\n" +
             Translation.Menu.Get("Tooltip.Keybinds:Auto TL");
 
-        public override bool IsVisible() => Options.timedLightsEnabled;
+        protected override bool IsVisible() => IsButtonEnabled();
+
+        public static bool IsButtonEnabled() => Options.timedLightsEnabled;
     }
 }

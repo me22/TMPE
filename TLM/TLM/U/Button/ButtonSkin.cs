@@ -2,21 +2,28 @@ namespace TrafficManager.U.Button {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.UI;
+    using JetBrains.Annotations;
 
     /// <summary>
     /// Struct defines button atlas keys for button states.
     /// Atlas is loaded when the button is created.
     /// Some fields can be set to true to indicate that sprites exist and should be loaded and used.
-    /// Skin setup example. In button constructor write:
+    /// Skin setup example.
+    /// -------------------------------------------------------------------------------
+    /// In button constructor write:
     /// this.Skin = new ButtonSkin {
-    ///                                Prefix = "MainMenuButton",
-    ///                                BackgroundHovered = true,
-    ///                                BackgroundActive = true,
-    ///                                ForegroundHovered = true,
-    ///                                ForegroundActive = true,
-    ///                            };
-    /// this.atlas = this.Skin.CreateAtlas("MainMenu", 50, 50, 256);
-    ///
+    ///     Prefix = "MainMenuButton",
+    ///     BackgroundPrefix = "MainMenuButton", // this also loads the *-bg-normal
+    ///     BackgroundHovered = true,
+    ///     BackgroundActive = true,
+    ///     ForegroundHovered = true,
+    ///     ForegroundActive = true,
+    /// };
+    /// this.atlas = this.Skin.CreateAtlas("MainMenu", 50, 50, 256, Skin.CreateAtlasKeyset());
+    /// -------------------------------------------------------------------------------
+    /// Background is always loaded if "BackgroundPrefix" is not empty.
+    /// Foreground Normal is always loaded.
+    /// Rest of the skin sprites you can control using the boolean variables provided.
     /// </summary>
     public class ButtonSkin {
         /// <summary>Foreground sprites are loaded with this prefix.</summary>
@@ -87,12 +94,12 @@ namespace TrafficManager.U.Button {
                                           int hintAtlasTextureSize,
                                           HashSet<string> atlasKeyset) {
             return TextureUtil.CreateAtlas(
-                $"TMPE_U_{Prefix}_Atlas",
-                loadingPath,
-                atlasKeyset.ToArray(),
-                spriteWidth,
-                spriteHeight,
-                hintAtlasTextureSize);
+                atlasName: $"TMPE_U_{Prefix}_Atlas",
+                resourcePrefix: loadingPath,
+                spriteNames: atlasKeyset.ToArray(),
+                spriteWidth: spriteWidth,
+                spriteHeight: spriteHeight,
+                hintAtlasTextureSize: hintAtlasTextureSize);
         }
 
         /// <summary>
