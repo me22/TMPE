@@ -2,7 +2,6 @@ namespace TrafficManager.Manager.Impl {
     using ColossalFramework.Globalization;
     using ColossalFramework.Math;
     using ColossalFramework;
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System;
@@ -1825,8 +1824,7 @@ namespace TrafficManager.Manager.Impl {
             Vector3 parkPos;
             Quaternion parkRot;
 
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "FindParkingSpaceInVicinity")) {
-                found = Instance.FindParkingSpaceInVicinity(
+            found = Instance.FindParkingSpaceInVicinity(
                     refPos,
                     Vector3.zero,
                     parkedVehicle.Info,
@@ -1838,7 +1836,6 @@ namespace TrafficManager.Manager.Impl {
                     out parkPos,
                     out parkRot,
                     out _);
-            }
 
             if (found) {
                 Singleton<VehicleManager>.instance.RemoveFromGrid(parkedVehicleId, ref parkedVehicle);
